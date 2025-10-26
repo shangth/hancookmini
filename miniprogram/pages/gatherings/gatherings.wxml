@@ -1,0 +1,94 @@
+<view class="container">
+  <!-- 自定义导航栏 -->
+  <navigation-bar title="聚会列表" />
+  
+  <!-- 聚会列表 -->
+  <view class="gatherings-list">
+    <view wx:for="{{gatherings}}" wx:key="id" class="gathering-card" bindtap="goToOrdering" data-id="{{item.id}}">
+      <!-- 卡片头部 -->
+      <view class="card-header">
+        <view class="gathering-name">{{item.name}}</view>
+        <view class="gathering-status">
+          <view class="tag {{getStatusClass(item.status)}}">{{getStatusText(item.status)}}</view>
+          <view class="tag {{item.menu_locked ? 'tag-danger' : 'tag-success'}}" style="margin-left: 10rpx;">
+            {{item.menu_locked ? '已锁定' : '未锁定'}}
+          </view>
+        </view>
+      </view>
+      
+      <!-- 聚会信息 -->
+      <view class="gathering-info">
+        <view class="info-item">
+          <text class="icon">📅</text>
+          <text class="info-text">{{formatDate(item.time)}}</text>
+        </view>
+        <view class="info-item">
+          <text class="icon">📍</text>
+          <text class="info-text">{{item.location}}</text>
+        </view>
+      </view>
+      
+      <!-- 管理员操作按钮 -->
+      <view wx:if="{{isAdmin}}" class="card-actions" catchtap="stopPropagation">
+        <view class="action-btn" catchtap="showActionSheet" data-id="{{item.id}}">
+          <text class="action-icon">⋯</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 空状态 -->
+    <view wx:if="{{gatherings.length === 0}}" class="empty-state">
+      <view class="empty-state-icon">🍽️</view>
+      <view class="empty-state-text">暂无聚会</view>
+    </view>
+  </view>
+  
+  <!-- 管理员创建按钮 -->
+  <view wx:if="{{isAdmin}}" class="fab" bindtap="showCreateDialog">
+    <text style="color: #fff; font-size: 48rpx;">+</text>
+  </view>
+  
+  <!-- 添加菜单按钮 -->
+  <view wx:if="{{isAdmin}}" class="fab-menu" bindtap="goToAddDish">
+    <text style="color: #fff; font-size: 32rpx;">🍳</text>
+  </view>
+  
+  <!-- 创建/编辑聚会弹窗 -->
+  <view wx:if="{{showDialog}}" class="modal-overlay" bindtap="hideDialog">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">{{dialogMode === 'create' ? '创建聚会' : '编辑聚会'}}</view>
+        <view class="modal-close" bindtap="hideDialog">✕</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="form-group">
+          <view class="form-label">聚会名称</view>
+          <input class="form-input" placeholder="请输入聚会名称" value="{{formData.name}}" bindinput="onInputName" maxlength="50" />
+        </view>
+        
+        <view class="form-group">
+          <view class="form-label">聚会时间</view>
+          <picker mode="date" value="{{formData.date}}" bindchange="onDateChange">
+            <view class="form-input picker-input">{{formData.date || '请选择日期'}}</view>
+          </picker>
+          <picker mode="time" value="{{formData.time}}" bindchange="onTimeChange">
+            <view class="form-input picker-input" style="margin-top: 10rpx;">{{formData.time || '请选择时间'}}</view>
+          </picker>
+        </view>
+        
+        <view class="form-group">
+          <view class="form-label">聚会地点</view>
+          <input class="form-input" placeholder="请输入聚会地点" value="{{formData.location}}" bindinput="onInputLocation" maxlength="100" />
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <button class="btn-secondary" bindtap="hideDialog">取消</button>
+        <button class="btn-primary" bindtap="submitForm">确认</button>
+      </view>
+    </view>
+  </view>
+</view>
+
+

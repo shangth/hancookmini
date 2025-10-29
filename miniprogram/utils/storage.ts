@@ -1,5 +1,5 @@
 // 本地存储工具函数
-import { mockGatherings, mockLikes, mockDishes, currentUser } from './mock-data'
+import { mockLikes, mockDishes, currentUser } from './mock-data'
 import { Gathering, Like, Dish } from './types'
 
 const STORAGE_KEY = {
@@ -13,9 +13,6 @@ const STORAGE_KEY = {
 export function initStorage() {
   try {
     // 如果没有数据，则初始化
-    if (!wx.getStorageSync(STORAGE_KEY.GATHERINGS)) {
-      wx.setStorageSync(STORAGE_KEY.GATHERINGS, mockGatherings)
-    }
     if (!wx.getStorageSync(STORAGE_KEY.LIKES)) {
       wx.setStorageSync(STORAGE_KEY.LIKES, mockLikes)
     }

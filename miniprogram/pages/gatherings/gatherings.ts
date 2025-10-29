@@ -1,7 +1,49 @@
 // pages/gatherings/gatherings.ts
-import { getGatherings, saveGatherings, getCurrentUser } from '../../utils/storage'
-import { formatDate, getGatheringStatusText, getCurrentISOTime } from '../../utils/date'
+import { getCurrentUser } from '../../utils/storage'
+import { getGatheringStatusText, getCurrentISOTime } from '../../utils/date'
 import { Gathering, GatheringStatus, PreparationStage, UserRole } from '../../utils/types'
+import { getGatherings, createGathering, updateGathering, deleteGathering } from '../../api/gathering'
+
+// Mock 聚会数据
+const mockGatherings: Gathering[] = [
+  {
+    id: 'gathering_001',
+    name: '周末聚餐',
+    time: '2025-10-20T18:00:00Z',
+    location: '寒厨的家',
+    status: GatheringStatus.NOT_STARTED,
+    menu_locked: false,
+    preparation_stage_id: PreparationStage.CONFIRM_DISHES,
+    created_by: 'user_001',
+    created_at: '2025-10-14T10:00:00Z',
+    updated_at: '2025-10-14T10:00:00Z'
+  },
+  {
+    id: 'gathering_002',
+    name: '生日派对',
+    time: '2025-10-15T19:00:00Z',
+    location: '市中心餐厅',
+    status: GatheringStatus.IN_PROGRESS,
+    menu_locked: true,
+    preparation_stage_id: PreparationStage.SHOPPING_LIST,
+    created_by: 'user_001',
+    created_at: '2025-10-10T10:00:00Z',
+    updated_at: '2025-10-14T10:00:00Z'
+  },
+  {
+    id: 'gathering_003',
+    name: '国庆聚会',
+    time: '2025-10-01T12:00:00Z',
+    location: '公园野餐',
+    status: GatheringStatus.FINISHED,
+    menu_locked: true,
+    preparation_stage_id: PreparationStage.SHOPPING_LIST,
+    created_by: 'user_001',
+    created_at: '2025-09-25T10:00:00Z',
+    updated_at: '2025-10-02T10:00:00Z'
+  }
+]
+
 
 interface FormData {
   name: string
@@ -17,6 +59,8 @@ Page({
     showDialog: false,
     dialogMode: 'create' as 'create' | 'edit',
     currentGatheringId: '',
+    statusBarHeight: 0,
+    navBarHeight: 0,
     formData: {
       name: '',
       date: '',
@@ -26,15 +70,49 @@ Page({
   },
 
   onLoad() {
-    this.loadData()
+    this.getSystemInfo()
+    this.loadData();
+    wx.login({
+      success: (res) => {
+        console.log(res)
+      },
+      fail: (err) => {
+        console.log(err)
+      }
+    })
+  },
+  getUserProfile() {
+    console.log('getUserProfile')
+    wx.getUserProfile({
+      desc: '展示用户头像',
+      success: (res) => {
+        console.log(res.userInfo)
+      },
+      fail: (err) => {
+        console.log(err)
+      }
+    })
+  },
+
+  getSystemInfo() {
+    const systemInfo = wx.getSystemInfoSync()
+    const statusBarHeight = systemInfo.statusBarHeight || 0
+    // 88rpx转换为px：88 * (screenWidth / 750)
+    const navBarHeight = statusBarHeight + (88 * systemInfo.screenWidth / 750)
+    
+    this.setData({
+      statusBarHeight,
+      navBarHeight
+    })
   },
 
   onShow() {
     this.loadData()
   },
 
-  loadData() {
-    const gatherings = getGatherings()
+  async loadData() {
+    const gatherings = await getGatherings();
+    console.log(gatherings)
     const currentUser = getCurrentUser()
     
     this.setData({
@@ -43,9 +121,6 @@ Page({
     })
   },
 
-  formatDate(dateStr: string): string {
-    return formatDate(dateStr)
-  },
 
   getStatusText(status: string): string {
     return getGatheringStatusText(status)
@@ -53,38 +128,27 @@ Page({
 
   getStatusClass(status: string): string {
     const classMap: Record<string, string> = {
-      'not_started': 'tag-success',
-      'in_progress': 'tag-warning',
-      'finished': 'tag-info'
+      [GatheringStatus.NOT_STARTED]: 'tag-success',
+      [GatheringStatus.IN_PROGRESS]: 'tag-warning',
+      [GatheringStatus.FINISHED]: 'tag-info'
     }
     return classMap[status] || 'tag-info'
   },
 
-  stopPropagation(e: any) {
+  stopPropagation() {
     // 阻止事件冒泡
   },
 
-  goToOrdering(e: any) {
-    const { id } = e.currentTarget.dataset
-    wx.navigateTo({
-      url: `/pages/ordering/ordering?id=${id}`
-    })
-  },
 
-  goToAddDish() {
-    wx.navigateTo({
-      url: '/pages/add-dish/add-dish'
-    })
-  },
 
   showActionSheet(e: any) {
     const { id } = e.currentTarget.dataset
-    const gatherings = getGatherings()
+    const gatherings = mockGatherings;
     const gathering = gatherings.find(g => g.id === id)
     
     if (!gathering) return
     
-    const itemList = []
+    const itemList: string[] = []
     
     // 编辑聚会
     itemList.push('编辑聚会')
@@ -137,7 +201,7 @@ Page({
   },
 
   editGathering(id: string) {
-    const gatherings = getGatherings()
+    const gatherings = mockGatherings;
     const gathering = gatherings.find(g => g.id === id)
     
     if (!gathering) return
@@ -167,9 +231,9 @@ Page({
       confirmColor: '#ff4d4f',
       success: (res) => {
         if (res.confirm) {
-          const gatherings = getGatherings()
+          const gatherings = mockGatherings;
           const newGatherings = gatherings.filter(g => g.id !== id)
-          saveGatherings(newGatherings)
+          // saveGatherings(newGatherings)
           
           wx.showToast({
             title: '删除成功',
@@ -183,13 +247,13 @@ Page({
   },
 
   lockMenu(id: string) {
-    const gatherings = getGatherings()
+    const gatherings = mockGatherings;
     const gathering = gatherings.find(g => g.id === id)
     
     if (gathering) {
       gathering.menu_locked = true
       gathering.updated_at = getCurrentISOTime()
-      saveGatherings(gatherings)
+      // saveGatherings(gatherings)
       
       wx.showToast({
         title: '菜单已锁定',
@@ -201,13 +265,13 @@ Page({
   },
 
   unlockMenu(id: string) {
-    const gatherings = getGatherings()
+    const gatherings = mockGatherings;
     const gathering = gatherings.find(g => g.id === id)
     
     if (gathering) {
       gathering.menu_locked = false
       gathering.updated_at = getCurrentISOTime()
-      saveGatherings(gatherings)
+      // saveGatherings(gatherings)
       
       wx.showToast({
         title: '菜单已解锁',
@@ -224,13 +288,13 @@ Page({
       content: '确认标记该聚会为已结束吗？',
       success: (res) => {
         if (res.confirm) {
-          const gatherings = getGatherings()
+          const gatherings = mockGatherings;
           const gathering = gatherings.find(g => g.id === id)
           
           if (gathering) {
             gathering.status = GatheringStatus.FINISHED
             gathering.updated_at = getCurrentISOTime()
-            saveGatherings(gatherings)
+            // saveGatherings(gatherings)
             
             wx.showToast({
               title: '已标记为已结束',
@@ -334,7 +398,7 @@ Page({
       return
     }
     
-    const gatherings = getGatherings()
+    const gatherings = mockGatherings;
     const currentUser = getCurrentUser()
     
     if (dialogMode === 'create') {
@@ -353,7 +417,7 @@ Page({
       }
       
       gatherings.unshift(newGathering)
-      saveGatherings(gatherings)
+      // saveGatherings(gatherings)
       
       wx.showToast({
         title: '创建成功',
@@ -369,7 +433,7 @@ Page({
         gathering.location = formData.location.trim()
         gathering.updated_at = getCurrentISOTime()
         
-        saveGatherings(gatherings)
+        // saveGatherings(gatherings)
         
         wx.showToast({
           title: '修改成功',

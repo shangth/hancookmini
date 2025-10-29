@@ -1,30 +1,43 @@
-<view class="container">
+<wxs module="format" src="./format.wxs"></wxs>
+
+<view class="container" style="padding-top: {{navBarHeight}}px;">
   <!-- 自定义导航栏 -->
   <navigation-bar title="聚会列表" />
   
   <!-- 聚会列表 -->
   <view class="gatherings-list">
     <view wx:for="{{gatherings}}" wx:key="id" class="gathering-card" bindtap="goToOrdering" data-id="{{item.id}}">
-      <!-- 卡片头部 -->
-      <view class="card-header">
-        <view class="gathering-name">{{item.name}}</view>
-        <view class="gathering-status">
-          <view class="tag {{getStatusClass(item.status)}}">{{getStatusText(item.status)}}</view>
-          <view class="tag {{item.menu_locked ? 'tag-danger' : 'tag-success'}}" style="margin-left: 10rpx;">
-            {{item.menu_locked ? '已锁定' : '未锁定'}}
+      <!-- 卡片内容区域 -->
+      <view class="card-content">
+        <!-- 左侧信息区域 -->
+        <view class="card-left">
+          <!-- 聚会状态 -->
+          <!-- <view class="gathering-status">
+            <view class="tag {{getStatusClass(item.status)}}">{{getStatusText(item.status)}}</view>
+            <view class="tag {{item.menu_locked ? 'tag-danger' : 'tag-success'}}" style="margin-left: 10rpx;">
+              {{item.menu_locked ? '已锁定' : '未锁定'}}
+            </view>
+          </view> -->
+          
+          <!-- 聚会名称 -->
+          <view class="gathering-name">{{item.name}}</view>
+          
+          <!-- 聚会时间 -->
+          <view class="info-item">
+            <text class="icon">时间：</text>
+            <text class="info-text">{{format.formatDate(item.time)}}</text>
+          </view>
+          
+          <!-- 聚会地点 -->
+          <view class="info-item">
+            <text class="icon">地点：</text>
+            <text class="info-text">{{item.location}}</text>
           </view>
         </view>
-      </view>
-      
-      <!-- 聚会信息 -->
-      <view class="gathering-info">
-        <view class="info-item">
-          <text class="icon">📅</text>
-          <text class="info-text">{{formatDate(item.time)}}</text>
-        </view>
-        <view class="info-item">
-          <text class="icon">📍</text>
-          <text class="info-text">{{item.location}}</text>
+        
+        <!-- 右侧图片区域 -->
+        <view class="card-right">
+          <image class="gathering-image" src="{{item.image || '/images/default-gathering.jpg'}}" mode="aspectFill" />
         </view>
       </view>
       
@@ -41,6 +54,10 @@
       <view class="empty-state-icon">🍽️</view>
       <view class="empty-state-text">暂无聚会</view>
     </view>
+
+    <view class="user-info" bindtap="getUserProfile">
+     get
+    </view>
   </view>
   
   <!-- 管理员创建按钮 -->
@@ -48,10 +65,6 @@
     <text style="color: #fff; font-size: 48rpx;">+</text>
   </view>
   
-  <!-- 添加菜单按钮 -->
-  <view wx:if="{{isAdmin}}" class="fab-menu" bindtap="goToAddDish">
-    <text style="color: #fff; font-size: 32rpx;">🍳</text>
-  </view>
   
   <!-- 创建/编辑聚会弹窗 -->
   <view wx:if="{{showDialog}}" class="modal-overlay" bindtap="hideDialog">

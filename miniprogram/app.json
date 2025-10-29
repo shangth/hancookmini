@@ -1,10 +1,6 @@
 {
   "pages": [
-    "pages/gatherings/gatherings",
-    "pages/ordering/ordering",
-    "pages/add-dish/add-dish",
-    "pages/preparation/preparation",
-    "pages/logs/logs"
+    "pages/gatherings/gatherings"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -36,45 +36,6 @@ export const mockUsers: User[] = [
   }
 ]
 
-// Mock 聚会数据
-export const mockGatherings: Gathering[] = [
-  {
-    id: 'gathering_001',
-    name: '周末聚餐',
-    time: '2025-10-20T18:00:00Z',
-    location: '寒厨的家',
-    status: GatheringStatus.NOT_STARTED,
-    menu_locked: false,
-    preparation_stage_id: PreparationStage.CONFIRM_DISHES,
-    created_by: 'user_001',
-    created_at: '2025-10-14T10:00:00Z',
-    updated_at: '2025-10-14T10:00:00Z'
-  },
-  {
-    id: 'gathering_002',
-    name: '生日派对',
-    time: '2025-10-15T19:00:00Z',
-    location: '市中心餐厅',
-    status: GatheringStatus.IN_PROGRESS,
-    menu_locked: true,
-    preparation_stage_id: PreparationStage.SHOPPING_LIST,
-    created_by: 'user_001',
-    created_at: '2025-10-10T10:00:00Z',
-    updated_at: '2025-10-14T10:00:00Z'
-  },
-  {
-    id: 'gathering_003',
-    name: '国庆聚会',
-    time: '2025-10-01T12:00:00Z',
-    location: '公园野餐',
-    status: GatheringStatus.FINISHED,
-    menu_locked: true,
-    preparation_stage_id: PreparationStage.SHOPPING_LIST,
-    created_by: 'user_001',
-    created_at: '2025-09-25T10:00:00Z',
-    updated_at: '2025-10-02T10:00:00Z'
-  }
-]
 
 // Mock 菜品数据
 export const mockDishes: Dish[] = [

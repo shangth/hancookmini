@@ -1,0 +1,30 @@
+// 日期格式化工具
+function formatDate(dateStr) {
+  if (!dateStr) {
+    return '';
+  }
+  
+  var date = getDate(dateStr);
+  if (!date) {
+    return dateStr;
+  }
+  
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  var hour = date.getHours();
+  var minute = date.getMinutes();
+  
+  month = month < 10 ? '0' + month : month;
+  day = day < 10 ? '0' + day : day;
+  hour = hour < 10 ? '0' + hour : hour;
+  minute = minute < 10 ? '0' + minute : minute;
+  
+  return year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+}
+
+module.exports = {
+  formatDate: formatDate
+};
+
+
